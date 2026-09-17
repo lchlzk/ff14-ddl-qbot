@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="QQ 机器人本地管理后台">
+  <title>机器人控制台</title>
+  <link rel="stylesheet" href="/admin/assets/admin.css?v=20260911-1">
+</head>
+<body>
+  <section class="login-shell" id="loginShell" aria-labelledby="loginTitle">
+    <div class="login-card">
+      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></div>
+      <p class="eyebrow">LOCAL CONTROL PLANE</p>
+      <h1 id="loginTitle">机器人控制台</h1>
+      <p class="login-copy">使用服务器主人设置的后台账号登录。</p>
+      <form id="loginForm">
+        <div class="credential-grid">
+          <div>
+            <label for="loginUsername">用户名</label>
+            <input id="loginUsername" name="username" type="text" autocomplete="username"
+                   minlength="2" maxlength="32" placeholder="输入后台用户名" required>
+          </div>
+          <div>
+            <label for="loginPassword">密码</label>
+            <input id="loginPassword" name="password" type="password" autocomplete="current-password"
+                   minlength="10" maxlength="128" placeholder="输入后台密码" required>
+          </div>
+          <button type="submit" class="primary">登录后台</button>
+        </div>
+      </form>
+      <div class="command-note">
+        <span>首次设置或忘记密码</span><code>bot.cmd web account</code>
+        <span>Linux</span><code>./bot.sh web account</code>
+      </div>
+      <p class="security-note">密码只保存加盐哈希，无法从数据库还原。连续输错 5 次会暂停登录 5 分钟。</p>
+      <p class="form-error" id="loginError" role="alert"></p>
+    </div>
+  </section>
+
+  <div class="app-shell" id="appShell" hidden>
+    <aside class="sidebar">
+      <a class="brand" href="#overview" aria-label="机器人控制台首页">
+        <span class="brand-mark small" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span><b>0神信徒</b><small>机器人控制台</small></span>
+      </a>
+      <nav aria-label="主要导航">
+        <button class="nav-item active" data-view="overview"><i>01</i><span>运行概览</span></button>
+        <button class="nav-item" data-view="bots"><i>02</i><span>机器人</span></button>
+        <button class="nav-item" data-view="groups"><i>03</i><span>群设置</span></button>
+        <button class="nav-item" data-view="roles"><i>04</i><span>AI 角色</span></button>
+        <button class="nav-item" data-view="learning"><i>05</i><span>学习词库</span></button>
+        <button class="nav-item" data-view="gallery"><i>06</i><span>共享图库</span></button>
+        <button class="nav-item" data-view="feedback"><i>07</i><span>反馈箱</span><em id="feedbackBadge" hidden></em></button>
+        <button class="nav-item" data-view="audit"><i>08</i><span>操作记录</span></button>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="privacy-chip"><span></span>仅本机授权</div>
+        <button class="text-button" id="logoutButton">退出登录</button>
+      </div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div>
+          <p class="eyebrow" id="viewEyebrow">SYSTEM OVERVIEW</p>
+          <h1 id="viewTitle">运行概览</h1>
+        </div>
+        <div class="top-actions">
+          <label class="bot-picker" id="botPicker"><span>当前机器人</span><select id="botSelect" aria-label="选择当前机器人"><option value="">尚未配置</option></select></label>
+          <span class="health-pill" id="healthPill"><i></i><span>连接中</span></span>
+          <button class="icon-button" id="refreshButton" title="刷新当前页面" aria-label="刷新当前页面">↻</button>
+        </div>
+      </header>
+      <div id="content" class="content" aria-live="polite"></div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+  <dialog class="confirm-dialog" id="confirmDialog" aria-labelledby="confirmTitle">
+    <form method="dialog">
+      <span class="dialog-kicker">需要确认</span>
+      <h2 id="confirmTitle">确认操作</h2>
+      <p id="confirmNote"></p>
+      <div class="dialog-actions">
+        <button class="button" value="cancel">取消</button>
+        <button class="button danger" value="confirm">确认执行</button>
+      </div>
+    </form>
+  </dialog>
+  <script src="/admin/assets/admin.js?v=20260911-2" defer></script>
+</body>
+</html>

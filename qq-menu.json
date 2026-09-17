@@ -1,0 +1,425 @@
+{
+  "custom_menu": {
+    "items": [
+      {
+        "type": "send_message",
+        "name": "功能目录",
+        "send_message": "/toolbox"
+      },
+      {
+        "type": "send_message",
+        "name": "FF14插件",
+        "send_message": "/ff14"
+      },
+      {
+        "type": "send_message",
+        "name": "嘟嘟脸查询",
+        "send_message": "/tr"
+      },
+      {
+        "type": "send_message",
+        "name": "B站推送",
+        "send_message": "/bili"
+      },
+      {
+        "type": "send_message",
+        "name": "随机猫图",
+        "send_message": "/cat"
+      },
+      {
+        "type": "send_message",
+        "name": "反馈帮助",
+        "send_message": "/comment"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "scope": "c2c",
+      "target_type": "all",
+      "panel": {
+        "items": [
+          {
+            "type": "command",
+            "name": "toolbox",
+            "desc": "查看全部功能和插件",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "ff14",
+            "desc": "FF14插件查询目录",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "cat",
+            "desc": "随机猫图",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "waifu",
+            "desc": "本地动漫图库",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "gif",
+            "desc": "生成文字动图",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "image",
+            "desc": "本地分类图库",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "tex",
+            "desc": "生成数学公式图片",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "tr",
+            "desc": "嘟嘟脸图鉴与攻略",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "vote",
+            "desc": "发起与参与投票",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "lottery",
+            "desc": "报名抽奖",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "custom_reply",
+            "desc": "关键词回复与设置",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "akhr",
+            "desc": "明日方舟公招计算",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "dice",
+            "desc": "投掷多面骰子",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "ai",
+            "desc": "创建和管理我的AI角色",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "bot",
+            "desc": "查看本人管理功能",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "group",
+            "desc": "当前会话管理设置",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "command",
+            "desc": "管理本会话命令开关",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "left_reply",
+            "desc": "查看今日剩余次数",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "comment",
+            "desc": "提交意见反馈",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "ping",
+            "desc": "检查机器人是否在线",
+            "only_admin": false
+          }
+        ],
+        "remark": "nonebot-qq-menu:c2c"
+      }
+    },
+    {
+      "scope": "group",
+      "target_type": "all",
+      "panel": {
+        "items": [
+          {
+            "type": "command",
+            "name": "toolbox",
+            "desc": "查看全部功能和插件",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "ff14",
+            "desc": "FF14插件查询目录",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "cat",
+            "desc": "随机猫图",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "waifu",
+            "desc": "本地动漫图库",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "gif",
+            "desc": "生成文字动图",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "image",
+            "desc": "本地分类图库",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "tex",
+            "desc": "生成数学公式图片",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "tr",
+            "desc": "嘟嘟脸图鉴与攻略",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "vote",
+            "desc": "发起与参与投票",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "lottery",
+            "desc": "报名抽奖",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "custom_reply",
+            "desc": "关键词回复与设置",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "akhr",
+            "desc": "明日方舟公招计算",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "dice",
+            "desc": "投掷多面骰子",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "ai",
+            "desc": "查看群内AI角色和加入方法",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "bili",
+            "desc": "B站直播与动态推送",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "bot",
+            "desc": "查看本人管理功能",
+            "only_admin": true
+          },
+          {
+            "type": "command",
+            "name": "group",
+            "desc": "当前会话管理设置",
+            "only_admin": true
+          },
+          {
+            "type": "command",
+            "name": "command",
+            "desc": "管理本会话命令开关",
+            "only_admin": true
+          },
+          {
+            "type": "command",
+            "name": "comment",
+            "desc": "提交意见反馈",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "ping",
+            "desc": "检查机器人是否在线",
+            "only_admin": false
+          }
+        ],
+        "remark": "nonebot-qq-menu:group"
+      }
+    },
+    {
+      "scope": "channel",
+      "target_type": "all",
+      "panel": {
+        "items": [
+          {
+            "type": "command",
+            "name": "toolbox",
+            "desc": "查看全部功能和插件",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "ff14",
+            "desc": "FF14插件查询目录",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "cat",
+            "desc": "随机猫图",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "waifu",
+            "desc": "本地动漫图库",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "gif",
+            "desc": "生成文字动图",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "image",
+            "desc": "本地分类图库",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "tex",
+            "desc": "生成数学公式图片",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "tr",
+            "desc": "嘟嘟脸图鉴与攻略",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "vote",
+            "desc": "发起与参与投票",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "lottery",
+            "desc": "报名抽奖",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "custom_reply",
+            "desc": "关键词回复与设置",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "akhr",
+            "desc": "明日方舟公招计算",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "dice",
+            "desc": "投掷多面骰子",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "random",
+            "desc": "生成随机点数",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "bot",
+            "desc": "查看本人管理功能",
+            "only_admin": true
+          },
+          {
+            "type": "command",
+            "name": "group",
+            "desc": "当前会话管理设置",
+            "only_admin": true
+          },
+          {
+            "type": "command",
+            "name": "command",
+            "desc": "管理本会话命令开关",
+            "only_admin": true
+          },
+          {
+            "type": "command",
+            "name": "left_reply",
+            "desc": "查看今日剩余次数",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "comment",
+            "desc": "提交意见反馈",
+            "only_admin": false
+          },
+          {
+            "type": "command",
+            "name": "ping",
+            "desc": "检查机器人是否在线",
+            "only_admin": false
+          }
+        ],
+        "remark": "nonebot-qq-menu:channel"
+      }
+    }
+  ]
+}

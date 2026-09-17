@@ -1,0 +1,438 @@
+NoneBot QQ 离线安装包 / NoneBot QQ Offline Package
+====================================================
+
+中文说明
+--------
+
+AI 多角色聊天：在你的 QQ 机器人私聊发送 /ai 设置，按提示配置。
+可创建多个角色，选择智谱 GLM 或千问 Character，并使用用户自己的 API Key。
+发送 /ai 模型 可查看当前模型、默认推荐、推荐理由并手动切换；额度耗尽不会自动切换。
+不需要修改 .env 或重启；每人每群只能加入一个自己的角色，多人的角色可共存。
+完整步骤和密钥安全注意事项见同目录 AI.md（含 English quick reference）。
+
+群聊学习：这是 nonebot-plugin-learning-chat 面向腾讯官方 QQ 适配器的原生移植版。
+功能默认关闭；群主或群管理员在目标群发送 /learn 阅读隐私提示，再用 /learn on 开启。
+开启后，机器人会把本群合规文字和图片保存在本机 SQLite，学习相邻发言并概率回复；
+学习库默认公开，群主可用 /learn mode local 改为本群私有；数据不会进入图片图库或 AI 角色上下文。需要 QQ 平台实际投递群普通消息，
+只有 @ 消息权限时无法学习未 @ 的聊天。完整命令、容量和隐私说明见 LEARNING_CHAT.md。
+
+首次安装镜像导入修复：
+如果旧启动脚本出现 No such image: local/nonebot-qq:1.7.2，请替换为新版 bot.ps1
+后重新执行 bot.cmd start，不要删除或重填 .env。也可以在当前安装目录先执行：
+
+    docker load -i nonebot-qq.tar
+    bot.cmd start
+
+新版会自动处理首次导入和镜像升级。请完整解压整个安装包，保留 nonebot-qq.tar
+和 image-id.txt。不要将旧包的 image-id.txt 与新包的镜像混用。
+
+一、安装前准备
+
+1. 在 QQ 开放平台创建机器人，准备好自己的 AppID 和 AppSecret。
+2. 安装并启动 Docker：
+   - Windows：安装 Docker Desktop，并使用 Linux 容器。
+   - Linux：安装 Docker Engine 和 Docker Compose 插件，并确保当前用户可以运行 docker。
+3. 把整个压缩包解压到一个普通文件夹。不要直接在压缩包内运行脚本。
+4. 不需要安装 Python、NoneBot、Git 或 pip。
+
+二、Windows 安装
+
+1. 打开解压后的文件夹，在文件夹地址栏输入 cmd，然后按回车。
+2. 执行：
+
+       bot.cmd start
+
+3. 首次启动会生成不含 QQ 凭据的 .env，并启动网页后台。
+4. 脚本会自动导入随包镜像、启动容器并进行健康检查。成功后运行：
+
+       bot.cmd web account
+
+   设置后台账号，打开 http://127.0.0.1:8080/admin，在“机器人”页面填写
+   一个或多个 QQ AppID/AppSecret，然后运行 bot.cmd restart。
+5. 看到下面的提示表示启动成功：
+
+       QQ bot is running and healthy.
+
+6. 启动成功后，同步单聊菜单和单聊/群聊/频道指令面板：
+
+       menu.cmd sync
+
+7. 如果需要獭獭 FFXIV 查询功能，请先私聊一只在线獭獭发送：
+
+       /bot token 你设置的随机字符串
+
+   建议使用 12～16 位随机字母数字，服务端最多保存 16 个字符。然后在电脑中
+   执行以下命令。输入个人数字 QQ 号和刚才的 Token；Token 不会显示：
+
+       bot.cmd otter-setup
+       bot.cmd start
+
+   这里填写的是你的个人数字 QQ，不是 QQ 开放平台 AppID。无需在网站领养机器人。
+
+8. 如果需要 FF Logs 的 /dps 和 /raid 查询，请先在对应站点创建 API Client，
+   取得 Client ID 和 Client Secret：
+
+       国服：https://cn.fflogs.com/api/clients/
+       国际服：https://www.fflogs.com/api/clients/
+
+   然后执行：
+
+       bot.cmd fflogs-setup
+       bot.cmd start
+
+   这是可选配置，不影响 /ping 和其他已配置的功能。
+
+Windows 的 .cmd 启动器即使在系统禁止直接运行 PowerShell 脚本时也能使用。
+它只对本次子进程使用 ExecutionPolicy Bypass，不会修改系统执行策略。
+
+三、Linux 安装
+
+在解压后的目录执行：
+
+    chmod 755 ./bot.sh ./menu.sh
+    ./bot.sh start
+    ./menu.sh sync
+
+需要獭獭 FFXIV 功能时，再执行：
+
+    ./bot.sh otter-setup
+    ./bot.sh start
+
+需要 FF Logs 的 /dps 和 /raid 查询时，先在上面的国服或国际服链接申请
+Client ID/Secret，再执行：
+
+    ./bot.sh fflogs-setup
+    ./bot.sh start
+
+首次启动会生成不含 QQ 凭据的 .env。随后运行 ./bot.sh web account，打开
+http://127.0.0.1:8080/admin 添加一个或多个机器人，再运行 ./bot.sh restart。
+
+四、测试机器人
+
+单聊机器人发送：
+
+    /ping
+
+不配置獭獭 Token 也可使用市场查询和本地命令：
+
+    /market 火之水晶 拂晓之间
+    /market 8 拂晓之间
+    /gather 枫木原木
+    /sales 火之水晶 梦羽宝境
+    /recip 枫木木材
+    /recipe 枫木木材
+    /craftcost 枫木木材 陆行鸟
+    /cheapest 火之水晶 陆行鸟
+
+    /random 100
+    /gate 3
+    /dice 3d12+5
+    /about
+
+配置獭獭功能后还可以发送：
+
+    /otter
+    /quest 任务名
+    /search 物品名
+    /luck
+    /house 服务器 区域 大小 部队
+    /weather 区域 天气 3
+
+配置 FF Logs 官方 API v2 后可以发送：
+
+    /fflogs
+    /fflogs zones
+    /dps <角色名> <服务器> [区域=国服] [副本=M9S或ID] [职业=职业] [指标=rdps]
+    /raid <角色名> <服务器> [区域=国服] [副本=M9S或ID] [职业=职业] [指标=rdps]
+    /reid <角色名> <服务器> [区域=国服] [副本=M9S或ID] [职业=职业] [指标=rdps]
+
+/reid 是 /raid 的别名。英文多词角色名建议用竖线分隔，例如：
+
+    /dps North Face | Chocobo | JP | zone=76 | job=Paladin | metric=rdps
+
+可以发送 /fflogs zones 查看当前副本的名称、零式简称和 FF Logs ID。副本支持 M/P/E/O/A
+系列简称，例如 副本=M9S、直接写 E8S，或使用数字 ID；输入具体楼层时只显示该楼层。
+E8S 对应 zone 33 中的希瓦，M9S-M12S 对应 zone 73。metric 支持官方角色排名接口
+当前接受的 rdps、ndps、cdps、dps；zone 不填时由 FF Logs 选择当前可用副本。
+该功能只读取公开日志，找不到公开记录不代表角色没有通关。
+百分位采用 FF Logs 角色页面相同的历史排名口径，按战斗发生时的榜单评价，
+不会把旧战绩拿到今天的榜单重新计算。
+它使用服务器到服务器的 Client Credentials，无需域名、OAuth 回调地址，也无需
+普通 QQ 用户逐个登录授权。旧 OtterBot /dps、/raid 端点和
+OTTER_ENABLE_EXPERIMENTAL 配置已经移除。
+
+群聊通常需要发送：
+
+    @机器人 /ping
+
+是否必须 @机器人取决于 QQ 平台给机器人的消息权限。
+
+五、日常管理
+
+Windows：
+
+    bot.cmd status       查看运行状态
+    bot.cmd logs         查看日志，按 Ctrl+C 退出
+    bot.cmd web account  设置或重置网页后台账号密码
+    bot.cmd start        启动，或重新加载修改后的 .env
+    bot.cmd stop         停止机器人
+    bot.cmd setup -Force 重建不含 QQ 凭据的 .env
+    bot.cmd otter-setup  安全设置个人 QQ 和獭獭 API Token
+    bot.cmd fflogs-setup 安全设置 FF Logs Client ID 和 Client Secret
+    menu.cmd status      查看 QQ 菜单状态
+
+网页后台：机器人启动后运行 bot.cmd web account，按提示设置账号密码，然后打开
+http://127.0.0.1:8080/admin。可在“机器人”页面管理多个 AppID/AppSecret；修改后
+需要重启。Linux 使用 ./bot.sh web account。
+完整说明见 WEB_ADMIN.md。
+嘟嘟脸恶作剧资料查询发送 /tr；角色默认国服，可指定韩服，并附角色/食物/蜡笔加成小图（缓存 7 天）；兑换码可分国服/韩服，最多显示 10 个；在私聊或群聊发送 /tr 蜡笔板 导入，再于 10 分钟内单独上传 Soshage JSON，即可追踪个人进度。也可用“/tr 蜡笔板 点亮 角色名”和“/tr 蜡笔板 加点 角色名 2 攻击”手动更新；“/tr 蜡笔板 点亮 全部”可登记所有角色，“/tr 蜡笔板 加点 全部 1 攻击”可批量更新全部已拥有角色。公开目录每周四 18:00（UTC+8）刷新，个人进度不会自动改变。蜡笔板只统计百分比属性；可用“/tr 蜡笔板 未点 二层 攻击”按层查询缺口；暴击/暴伤以及暴抗/暴伤抗分别按同一个节点计数；详见 TRICKCAL.md。
+    menu.cmd sync        重新同步 QQ 菜单
+
+Linux 使用对应的 ./bot.sh 和 ./menu.sh 命令。
+
+六、重要提醒
+
+- 安装包只包含 .env.example，绝不会包含制作者自己的 .env。
+- QQ AppSecret 不写入 .env，而是在网页后台加密保存。备份数据卷时必须同时保留
+  SQLite 数据库和 secrets/qq-bots-master.key。
+- 獭獭 API Token 不是 AppSecret；它也只保存在 .env，不要在群聊发送或与他人分享。
+- FF Logs Client Secret 也只保存在 .env，不要放入镜像、菜单或分享给他人。
+- 离线包不会包含制作者的獭獭 Token 或 FF Logs Client ID/Secret；接收方需要这些
+  可选功能时，应申请自己的凭据并运行 otter-setup 或 fflogs-setup，然后再运行 start。
+- /market 直接使用 Universalis v2 和镜像内置国服物品索引，无需獭獭 Token；
+  也支持直接输入物品 ID。市场数据由玩家众包，可能存在延迟。
+- /gather、/recip（/recipe）、/sales、/craftcost、/cheapest 无需獭獭 Token；
+  国服资料来自中文 XIVAPI，市场数据来自 Universalis，均需要联网。
+- /craftcost 按当前最低挂单单价估算，不含税费，也不递归拆解半成品；材料缺少
+  行情时只显示已知小计，不会把不完整结果称为完整成本。
+- 其他獭獭功能通过第三方社区 API 提供，需要联网，服务临时不可用不会影响 /market、/ping 和机器人连接。
+- /luck 只向第三方发送本地生成的匿名标识，不发送原始 QQ OpenID。
+- 旧 botlist 接口存在私有账号泄露风险，本插件已明确禁用。
+- 原版獭獭的群管、订阅推送和自定义回复依赖领养网络/旧 OneBot，不能通过 WebAPI 完整移植。
+- 插件默认隐藏接口返回的网页链接，因此没有 QQ 可信域名也能使用纯文本查询结果。
+- 修改 .env 后重新执行 bot.cmd start 或 ./bot.sh start 即可，不需要重新构建镜像。
+- 修改 qq-menu.json 后重新执行菜单 sync 命令，不需要重启机器人。
+- 这个离线包中的镜像已经构建完成，不要在接收方电脑执行 build。
+- 插件已经构建进镜像。增删插件应在源项目中完成，然后重新生成离线包。
+- 目标电脑必须支持包内镜像的处理器架构；Windows Docker Desktop 必须使用 Linux 容器。
+
+
+English Instructions
+
+First-install image import fix: older Windows launchers may stop at "No such image".
+Replace bot.ps1 with the updated version and retry bot.cmd start, keeping your .env.
+Alternatively, run docker load -i nonebot-qq.tar in the installation folder first.
+Always extract the complete package and keep its matching archive and image-id.txt.
+--------------------
+
+Prerequisites
+
+1. Create a bot on the QQ Open Platform and obtain your own AppID and AppSecret.
+2. Install and start Docker with the Docker Compose plugin. Docker Desktop on
+   Windows must use Linux containers.
+3. Extract the entire package to a normal folder. Do not run it inside a ZIP file.
+4. Python, NoneBot, Git, and pip are not required on the target computer.
+
+Windows
+
+1. Open the extracted folder, type cmd in the folder address bar, and press Enter.
+2. Run:
+
+       bot.cmd start
+
+3. On first start, the script creates an .env without QQ credentials, imports the
+   bundled image, starts the service, and checks its health. Then run
+   `bot.cmd web account`, open http://127.0.0.1:8080/admin, add one or more QQ
+   AppID/AppSecret pairs on the Bots page, and run `bot.cmd restart`.
+4. After the bot is healthy, publish the menu and command panels:
+
+       menu.cmd sync
+
+5. Market lookup works without an Otter token. It uses Universalis v2 directly:
+
+       /market 8 Chocobo
+       /market 8 拂晓之间
+       /gather 枫木原木
+       /sales 火之水晶 梦羽宝境
+       /recip 枫木木材
+       /craftcost 枫木木材 陆行鸟
+       /cheapest 火之水晶 陆行鸟
+
+   Simplified Chinese marketable item names are bundled in the image. A numeric
+   item ID can be used for a newly released item that is not in the bundled index.
+   The five additional commands use the Simplified-Chinese XIVAPI service and
+   Universalis, and do not require an Otter token. /recipe is an alias for /recip.
+   /craftcost is a lowest-unit-price estimate; it excludes taxes and does not
+   recursively expand intermediate materials.
+
+6. To enable other OtterBot FFXIV queries, privately message an online OtterBot with:
+
+       /bot token YOUR_RANDOM_TOKEN
+
+   A random 12-16 character token is recommended; the service stores at most 16
+   characters. Then configure the personal numeric QQ used for that command and token:
+
+       bot.cmd otter-setup
+       bot.cmd start
+
+   This is your personal numeric QQ, not the QQ Open Platform AppID. Adoption on
+   the OtterBot website is not required.
+
+7. To enable the FF Logs /dps and /raid commands, create an API client on the site
+   matching the region you query and obtain a Client ID and Client Secret:
+
+       China: https://cn.fflogs.com/api/clients/
+       International: https://www.fflogs.com/api/clients/
+
+   Then run:
+
+       bot.cmd fflogs-setup
+       bot.cmd start
+
+   This setup is optional and does not affect /ping or other configured features.
+
+The .cmd launchers work when direct PowerShell script execution is blocked. They
+use ExecutionPolicy Bypass for that child process only and do not change system policy.
+
+Linux
+
+    chmod 755 ./bot.sh ./menu.sh
+    ./bot.sh start
+    ./menu.sh sync
+
+To enable OtterBot FFXIV queries on Linux:
+
+    ./bot.sh otter-setup
+    ./bot.sh start
+
+To enable FF Logs queries on Linux, register a Client ID/Secret at the China or
+international URL above, then run:
+
+    ./bot.sh fflogs-setup
+    ./bot.sh start
+
+Test the bot by sending /ping in a direct chat. /market, /gather, /sales, /recip,
+/craftcost, /cheapest, and the local commands /random, /gate, /dice, and /about
+work without an Otter token. The data and market tools still require Internet
+access. After configuring OtterBot, send /otter for its remaining FFXIV command
+list, including /weather.
+
+After configuring the official FF Logs API v2 integration, use:
+
+    /fflogs
+    /fflogs zones
+    /dps <character> <server> [region=CN] [zone=M9S-or-ID] [job=job] [metric=rdps]
+    /raid <character> <server> [region=CN] [zone=M9S-or-ID] [job=job] [metric=rdps]
+    /reid <character> <server> [region=CN] [zone=M9S-or-ID] [job=job] [metric=rdps]
+
+/reid is an alias for /raid. Use pipes for a multi-word English character name:
+
+    /dps North Face | Chocobo | JP | zone=76 | job=Paladin | metric=rdps
+
+Use /fflogs zones to list live zone names, common savage aliases, and FF Logs IDs.
+M/P/E/O/A savage floor aliases are accepted directly; for example E8S selects Shiva
+in zone 33, while M9S selects the first floor in zone 73. The official character-ranking
+API currently accepts rdps, ndps, cdps, and dps. When zone is omitted,
+FF Logs selects the current available zone. Only public reports can be read; the
+absence of a public record does not prove that the character has not cleared. The
+percentiles use the same historical-ranking basis as FF Logs character pages, so an
+older performance is evaluated around the time it occurred rather than against today's leaderboard. The
+integration uses server-to-server Client Credentials: no public domain, OAuth callback,
+or authorization by ordinary QQ users is required. The legacy OtterBot /dps and /raid
+endpoints and the OTTER_ENABLE_EXPERIMENTAL setting have been removed.
+In a group, use @bot before a command unless the QQ platform has granted the bot
+permission to receive ordinary group messages.
+
+Common commands
+
+    bot.cmd status        Show container status
+    bot.cmd logs          Follow logs; press Ctrl+C to stop
+    bot.cmd web account   Set or reset the web administration account
+    bot.cmd start         Start or reload a changed .env
+    bot.cmd stop          Stop the bot
+    bot.cmd setup -Force  Recreate .env without QQ credentials
+    bot.cmd otter-setup   Securely set the personal QQ and Otter API Token
+    bot.cmd fflogs-setup  Securely set the FF Logs Client ID and Client Secret
+    menu.cmd status       Show QQ menu status
+
+Web administration: run bot.cmd web account after startup, set a username and password, then open
+http://127.0.0.1:8080/admin. Add and manage QQ bots there; additions connect immediately,
+disabled/deleted bots disconnect immediately, and changed credentials reconnect only that bot.
+On Linux use ./bot.sh web account. See WEB_ADMIN.md.
+    menu.cmd sync         Synchronize QQ menus
+
+The package contains .env.example but never the creator's .env. QQ AppSecrets are
+encrypted in the data volume instead of .env; back up both the database and
+secrets/qq-bots-master.key. Plugins are built into the image; change
+plugins in the source project and create a new offline package. Do not run build on
+the target computer. The Otter API Token is separate from AppSecret and must also
+remain private. The FF Logs Client Secret must remain private as well. The package
+does not include the creator's Otter token or FF Logs Client ID/Secret. Each recipient
+who wants these optional features must use their own credentials, run otter-setup or
+fflogs-setup, and then run start. OtterBot queries depend on a third-party community
+API. /market, /sales, /craftcost, and /cheapest use Universalis crowdsourced market
+data, which may be delayed. /gather and /recip use the Simplified-Chinese XIVAPI
+service. These commands do not require an Otter token. Returned web links are hidden
+by default, so no QQ trusted domain is required for text results.
+The plugin pseudonymizes QQ OpenIDs before /luck requests and disables the unsafe
+legacy botlist endpoint. Adoption-dependent group administration, subscriptions,
+and push features cannot be reproduced through the public WebAPI.
+新版工具箱 / Persistent toolbox
+
+图库默认使用公共图库。群主可发送 /group gallery local 改用最多 100 张的本群私有图库，
+或 /group gallery public 切回公共图库；切换不会公开、搬迁或改变旧图的归属。
+公共库不限制张数、不自动清理，但受磁盘容量限制；公共图仅机器人总管理员可删除。
+所有人可上传，合格 GIF 完整保存；/image status 查看容量，/image list 分类 page=2 翻页。
+本次仍为服务器本地存储，尚未接入 COS/S3，不需要云凭据。详细规则见 TOOLBOX.md。
+
+Group owners may select /group gallery public or local. Local: 100 images per chat;
+public: no count cap or automatic expiry, but finite disk space. Switching never
+publishes old local images. Only bot superadmins can delete public images. Valid
+GIFs retain all frames. Use /image status and /image list category page=2.
+Storage is still local SQLite; COS/S3 integration is not enabled in this release.
+
+群聊学习 / Learning chat
+
+群聊学习默认关闭。群主或群管理员发送 /learn 查看状态和隐私说明，发送 /learn on 开启；
+/learn off 停止学习和回复但保留已有数据。学习库默认公开共享，群主可用 /learn mode local
+改为本群私有；内容保存在 Docker bot-data 数据卷。管理命令、容量限制、屏蔽和清空方法见随包 LEARNING_CHAT.md。此功能需要 QQ
+平台实际投递群普通消息；只有 @ 消息事件时，机器人看不到未 @ 的消息。
+
+Learning chat is off by default. Group owners/admins can send /learn for the privacy
+notice and settings, then /learn on to enable it. The reply pool is public by default;
+group owners can use /learn mode local for strict group isolation. Content is stored in the Docker bot-data volume. See LEARNING_CHAT.md for all commands, limits,
+blocking and deletion. Ordinary group-message delivery must be enabled by the QQ platform;
+with mention-only events, unmentioned messages are not visible to the bot.
+===============================
+发送 /toolbox 或 /otter 查看同一份全部功能目录，完整中英文用法见随包 TOOLBOX.md。
+主面板中 FF14 只占 /ff14 一个插件入口，点开查看查询用法；原 /market、/dps 等命令仍可直接输入。
+修改原生面板配置后须执行 menu.cmd sync（Linux: ./menu.sh sync），重建镜像不会自动同步菜单。
+QQ 已推送全消息群事件时，新命令（例如 /cat）可直接发送；否则仍需 @机器人。
+QQ群主/管理员自动管理本群，无需运行服务器命令。
+群内 /bot 只向有管理权限者显示可用功能，不发身份码；普通成员无权访问。
+总管理员绑定需要三步：
+1. 服务器生成一次性授权码：Windows 用 bot.cmd admin token；Linux 用 ./bot.sh admin token。
+2. 仅本人机器人私聊发送 /bot whoami 授权码，换取身份码（此时不会赋予权限）。
+3. 回到服务器确认：Windows 用 bot.cmd admin add 身份码；Linux 用 ./bot.sh admin add 身份码。
+授权码 10 分钟有效、只能用一次；身份码需在 15 分钟内由服务器确认。
+配置立即生效，不用改 .env 或重启。已有授权保留，新总管理员只在私聊绑定。
+QQ群主不是机器人总管理员；只能管理本群，不能授权总管理员或查看全局反馈。
+反馈用 /comment 内容 本地保存；主人在已授权的机器人私聊里用
+/comment list、/comment show 编号、/comment done 编号 查看处理。
+按要求不做 /donate。/custom_reply 支持平台已授予的全消息权限，无此权限仍需 @。
+数据保存在 Docker bot-data 卷；不要运行 down -v 或删除数据卷。
+
+Send /toolbox or /otter for the same complete directory. See TOOLBOX.md for bilingual instructions.
+FF14 occupies one plugin entry, /ff14, opening its query help. Existing FF14 commands still work directly.
+After menu changes run menu.cmd sync or ./menu.sh sync; rebuilding does not synchronize native QQ panels.
+New commands such as /cat need no mention when QQ delivers full-message group events;
+otherwise mention the bot. Role checks, switches and rate limits still apply.
+QQ group owners/admins automatically manage their current group, without server access.
+In groups /bot shows authorized callers their management tools, never identity codes.
+New superadmin binding: server admin token -> private /bot whoami TOKEN -> server admin add CODE.
+Use bot.cmd on Windows or ./bot.sh on Linux. The invitation is single-use, valid for 10 minutes;
+confirm the private identity within 15 minutes. Redemption alone grants no permissions.
+Existing grants remain. New bindings are private-only, not linked across chats.
+Ordinary users cannot view the management panel. Feedback requires an authorized private chat.
+Custom replies accept QQ full-message events when granted by the platform.
+Do not delete the Docker bot-data volume during updates. No donation entry.
