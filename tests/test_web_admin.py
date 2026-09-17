@@ -10,6 +10,9 @@ from bot_tools.ai_store import AIStore
 from bot_tools.gallery import current as current_gallery
 from bot_tools.storage import Identity, Store, ToolError
 from bot_tools.web_admin import WebAdmin, install_web_admin
+from qbot_ff14.integration import register
+
+register()
 
 
 GROUP = Identity("test", "group:one", "member", False, "owner")

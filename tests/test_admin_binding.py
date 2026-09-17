@@ -24,6 +24,9 @@ from bot_tools.security import redact_binding_log
 from bot_tools.storage import Identity, Store, ToolError
 from nonebot.adapters.qq.event import C2CMessageCreateEvent, GroupAtMessageCreateEvent
 from plugins import toolbox
+from qbot_ff14.integration import register
+
+register()
 
 
 class BindingTests(unittest.TestCase):

@@ -23,7 +23,7 @@ from bot_tools.storage import ToolError
 from message_ui import error_panel, help_panel, panel, public_error_message
 
 
-COMMANDS = {"fsx","ofish","hunt","custom_reply","vote","lottery","cat","waifu","gif","image","tex","duilian","akhr","group","ginfo","command","left_reply","bot","comment"}
+COMMANDS = {"custom_reply","vote","lottery","cat","waifu","gif","image","tex","duilian","akhr","group","ginfo","command","left_reply","bot","comment"}
 
 
 def _visible_tool_error(error: ToolError) -> str:
@@ -66,8 +66,7 @@ async def remember_group_name(bot: Bot, event: MessageEvent):
 
 
 def is_help(name: str, raw: str) -> bool:
-    # /ofish without arguments actually computes the next departures.
-    return raw == "help" or (not raw and name not in {"ofish","cat","waifu"})
+    return raw == "help" or (not raw and name not in {"cat","waifu"})
 
 
 @run_preprocessor
@@ -102,7 +101,7 @@ async def dispatch(bot: Bot, event: MessageEvent, name: str, raw: str) -> str | 
         return await asyncio.to_thread(group_status.overview, store, who, raw)
     if name == "group" and (raw == "status" or raw.startswith("status ")):
         return await asyncio.to_thread(group_status.overview, store, who, raw[6:].strip())
-    if raw == "help" and name in {"bot","group","command","left_reply","custom_reply","hunt"}:
+    if raw == "help" and name in {"bot","group","command","left_reply","custom_reply"}:
         raw = ""
     # Apply cooldown to all non-help tool requests, including administration.
     if not is_help(name,raw):
@@ -112,9 +111,9 @@ async def dispatch(bot: Bot, event: MessageEvent, name: str, raw: str) -> str | 
         return await asyncio.to_thread(community.management,store,who,name,raw)
     if name in {"vote","lottery"}:
         return await asyncio.to_thread(community.activities,store,who,name,raw)
-    if name in {"custom_reply","hunt"}:
+    if name == "custom_reply":
         return await asyncio.to_thread(getattr(community,name),store,who,raw)
-    if name in {"fsx","ofish","akhr"}:
+    if name == "akhr":
         return await asyncio.to_thread(getattr(games,name),raw)
     if name == "duilian":
         return media.duilian(raw)

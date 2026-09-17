@@ -4,4 +4,3 @@ Pillow==12.3.0
 matplotlib==3.11.1
 cryptography==48.0.1
 cos-python-sdk-v5==1.9.44
-playwright==1.58.0

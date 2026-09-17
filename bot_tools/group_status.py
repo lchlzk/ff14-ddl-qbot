@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from message_ui import panel
-from . import gallery
+from . import gallery, group_extensions
 from .ai_store import AIStore
 from .learning_chat import LearningStore
 from .community import MANAGED
@@ -41,10 +41,9 @@ def overview(store: Store, who: Identity, raw: str = "") -> str:
     # Copy only the fields needed for display, then release the document lock
     # before opening the gallery and AI read transactions.
     with store.state(who.scope_key) as doc:
-        server = str(doc.get("server") or "未设置")
+        plugin_lines = group_extensions.overview(doc)
         quota = doc.get("quota", 100)
         replies = doc.get("replies") if isinstance(doc.get("replies"), dict) else {}
-        rules = doc.get("hunt_rules") if isinstance(doc.get("hunt_rules"), dict) else {}
         disabled = doc.get("disabled") if isinstance(doc.get("disabled"), list) else []
         disabled = sorted({item for item in disabled if isinstance(item, str) and item in MANAGED})
 
@@ -59,8 +58,7 @@ def overview(store: Store, who: Identity, raw: str = "") -> str:
     local_ai = "本群关闭" if "ai" in disabled else "本群启用"
     lines = [
         f"群标识：{who.scope_key[:10]}",
-        f"狩猎默认小区：{server}",
-        "  设置：/group server 梦羽宝境（供 /hunt 省略小区时使用）",
+        *plugin_lines,
         f"工具箱额度：每人每天 {quota} 次",
         "  设置：/group quota 100",
         f"图库：{'公共图库' if target.public else '本群图库'} · {gallery_limit} · {_size(image_bytes)}",
@@ -69,9 +67,8 @@ def overview(store: Store, who: Identity, raw: str = "") -> str:
         "本群已关闭功能：" + ("、".join("/" + item for item in disabled) if disabled else "无"),
         "  查看：/command list",
         "  示例：/command disable cat（关闭）· /command enable cat（恢复）",
-        f"关键词：{len(replies)} 条 · 狩猎规则：{len(rules)} 条",
+        f"关键词：{len(replies)} 条",
         "  关键词：/custom_reply set 关键词 | 内容",
-        "  狩猎：/hunt rule 怪物 最早小时 最晚小时",
         f"群聊学习：{'开启' if learned['enabled'] else '关闭'} · "
         f"{'公开库' if learned.get('library_mode', 'public') == 'public' else '本群私有库'} · "
         f"{learned['pairs']} 组回复 · 回复阈值 {learned['answer_threshold']}",

@@ -21,6 +21,11 @@ except ValueError:
 from bot_tools import community as c, games, media
 from bot_tools.storage import Identity, Store, ToolError
 from plugins import toolbox
+from qbot_ff14.hunt import hunt
+from qbot_ff14 import commands as ff14_commands
+from qbot_ff14.integration import register
+
+register()
 from nonebot.adapters.qq.event import GroupMessageCreateEvent, GroupAtMessageCreateEvent, C2CMessageCreateEvent
 
 
@@ -70,9 +75,9 @@ class StoreTests(unittest.TestCase):
                 c.custom_reply(self.store, who, "set 自动权限 | 已识别")
                 c.management(self.store, who, "command", "disable cat")
                 c.management(self.store, who, "command", "enable cat")
-                c.hunt(self.store, who, "rule 测试怪 4 6")
-                c.hunt(self.store, who, "kill 测试怪")
-                c.hunt(self.store, who, "undo 测试怪")
+                hunt(self.store, who, "rule 测试怪 4 6")
+                hunt(self.store, who, "kill 测试怪")
+                hunt(self.store, who, "undo 测试怪")
                 self.assertIn("梦羽宝境", c.management(self.store, who, "group", ""))
 
     def test_qq_role_is_not_cached_or_promoted_in_database(self):
@@ -303,22 +308,6 @@ class StoreTests(unittest.TestCase):
             results=list(pool.map(lambda _:c.activities(self.store,self.owner,"lottery","draw 1"),range(3)))
         self.assertEqual(len(set(results)),1)
 
-    def test_hunt_rules_and_undo(self):
-        with self.assertRaises(ToolError):
-            c.hunt(self.store,self.member,"rule 测试怪 4 6")
-        with self.assertRaises(ToolError):
-            c.hunt(self.store,self.owner,"rule 测试怪 nan 6")
-        c.hunt(self.store,self.owner,"rule 测试怪 4 6")
-        c.management(self.store,self.owner,"group","server 梦羽宝境")
-        c.hunt(self.store,self.owner,"kill 测试怪")
-        with self.assertRaises(ToolError):
-            c.hunt(self.store,self.member,"kill 测试怪")
-        result=c.hunt(self.store,self.member,"check 测试怪")
-        self.assertIn("窗口未到",result)
-        c.hunt(self.store,self.owner,"undo 测试怪")
-        with self.assertRaises(ToolError):
-            c.hunt(self.store,self.owner,"check 测试怪")
-
     def test_gallery_permissions_scope_and_duplicates(self):
         c.management(self.store,self.owner,"group","gallery local")
         c.management(self.store,replace(self.other,group_role="owner"),"group","gallery local")
@@ -363,39 +352,6 @@ class StoreTests(unittest.TestCase):
 
 
 class GameTests(unittest.TestCase):
-    def test_stats_base_and_breakpoints(self):
-        self.assertIn("5.0%",games.stat_values("crit",420)[0])
-        self.assertIn("1.000",games.stat_values("det",440)[0])
-        self.assertEqual(games.stat_values("speed",441)[1],250)
-        self.assertEqual(games.stat_values("speed",442)[1],249)
-        self.assertIn("+22",games.fsx("技速 420"))
-        self.assertIn("1.103",games.stat_values("ten",3000)[0])
-        self.assertEqual(games.stat_values("pie",458)[1],0)
-        self.assertEqual(games.stat_values("pie",459)[1],1)
-
-    def test_stats_validation(self):
-        for arg in ["暴击 1","det=420","crit=nan","speed=99999","职业 1000"]:
-            with self.assertRaises(ToolError,msg=arg):
-                games.fsx(arg)
-        self.assertIn("副属性换算",games.fsx("crit=3000 dh=1600 det=2200"))
-
-    def test_ocean_epoch_and_rotation(self):
-        self.assertEqual(games.route_at(0),"RN") # (88 % 12 + 88 // 12) = 11
-        self.assertEqual(games.route_at(7200*144),games.route_at(0))
-        self.assertEqual(games.route_at(0,"ruby74"),"RN")
-        self.assertEqual(games.route_at(7200*72,"ruby74"),games.route_at(0,"ruby74"))
-
-    def test_ocean_registration_boundary(self):
-        before=games.ofish("1",899)
-        after=games.ofish("1",900)
-        self.assertIn("08:00",before)
-        self.assertIn("正在报名",before)
-        self.assertIn("10:00",after)
-        self.assertNotIn("正在报名",after)
-        self.assertIn("红玉 / 7.5 起",games.ofish("红玉新 1",0))
-        for arg in ("红玉 3","0","6"):
-            with self.assertRaises(ToolError): games.ofish(arg)
-
     def test_ak_roster_and_six_star_rule(self):
         data=games.ak_data()
         self.assertGreater(len(data["operators"]),100)
@@ -586,7 +542,7 @@ class PluginTests(unittest.IsolatedAsyncioTestCase):
             event.content="/fsx 暴击 3000"
             who=toolbox.identity(bot,event)
             store.grant(store.register(who)["code"],"admin")
-            with patch.object(toolbox,"get_store",return_value=store):
+            with patch.object(toolbox,"get_store",return_value=store), patch.object(ff14_commands,"get_store",return_value=store):
                 await handle_event(bot,event)
                 self.assertTrue(bot.send.called)
                 self.assertIn("副属性换算",str(bot.send.call_args))

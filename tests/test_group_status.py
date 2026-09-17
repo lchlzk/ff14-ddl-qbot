@@ -6,6 +6,9 @@ import unittest
 from bot_tools import group_status
 from bot_tools.ai_store import AIStore
 from bot_tools.storage import Identity, Store, ToolError
+from qbot_ff14.integration import register
+
+register()
 
 
 class GroupStatusTests(unittest.TestCase):

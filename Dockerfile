@@ -34,8 +34,10 @@ RUN python -m pip install --no-cache-dir --no-compile \
         --requirement requirements-plugins.txt \
     && python -m pip check \
     && python /tmp/prune_runtime.py \
-    && python -m playwright install --with-deps chromium \
-    && chown -R bot:bot /ms-playwright \
+    && if python -c "import playwright" 2>/dev/null; then \
+         python -m playwright install --with-deps chromium \
+         && chown -R bot:bot /ms-playwright; \
+       fi \
     && rm -rf /var/lib/apt/lists/*
 
 COPY bot.py ./

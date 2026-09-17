@@ -312,19 +312,19 @@ function pluginSwitches(group) {
 async function renderGroups() {
   const query = new URLSearchParams({ page: state.page, q: state.queries.groups });
   const data = await api(scoped(`/admin/api/groups?${query}`));
-  const toolbar = `<div class="toolbar search-toolbar">${searchBox("groups", "搜索群名、短标识或默认小区")}<span class="tag">${data.total} 个群</span></div>`;
+  const toolbar = `<div class="toolbar search-toolbar">${searchBox("groups", "搜索群名、短标识或插件设置")}<span class="tag">${data.total} 个群</span></div>`;
   const cards = data.items.length ? `<div class="card-grid">${data.items.map((group) => `<article class="data-card group-card" data-scope="${h(group.scope)}">
     <div class="data-card-head"><div><h2>${group.name ? h(group.name) : `群 ${h(group.tag)}`}</h2><p class="mono">${group.name ? `群 ${h(group.tag)} · ${group.manual_name ? "后台命名" : "QQ 群名"}` : "隐私短标识 · 暂未取得群名"}</p></div><span class="tag ${group.gallery_mode === "local" ? "warn" : "good"}">${group.gallery_mode === "local" ? "本群图库" : "公共图库"}</span></div>
     <div class="data-lines">
       <div>AI 角色<br><b>${group.roles} 个</b></div><div>群聊学习<br><b>${group.learning.enabled ? "开启" : "关闭"} · ${group.learning.pairs} 组</b></div>
-      <div>关键词<br><b>${group.custom_replies} 条</b></div><div>狩猎规则<br><b>${group.hunt_rules} 条</b></div>
+      <div>关键词<br><b>${group.custom_replies} 条</b></div>${(group.plugin_details || []).map((item) => `<div>${h(item.label)}<br><b>${h(item.value)}</b></div>`).join("")}
       <div>私库容量<br><b>${group.gallery_count} 张 · ${h(group.gallery_size)}</b></div><div>已关闭功能<br><b>${group.disabled.length} 项</b></div>
     </div>
     <form class="group-form">
       <div class="form-grid">
         ${pluginSwitches(group)}
         <div class="form-field full"><label>群显示名称</label><input name="display_name" maxlength="40" value="${h(group.manual_name)}" placeholder="${h(group.official_name || "例如：轻零、0神信徒、爱★喝冻奶茶")}"><small>${group.official_name ? `QQ 自动取得：${h(group.official_name)}。留空使用官方群名。` : group.name_error ? `${h(group.name_error)}，可以在这里手动填写。` : "机器人收到下一条群消息后会尝试从腾讯同步；未开放接口时可手动填写。"}</small></div>
-        <div class="form-field"><label>狩猎默认小区</label><input name="server" maxlength="30" value="${h(group.server)}" placeholder="例如 梦羽宝境"></div>
+        ${(group.plugin_fields || []).map((field) => `<div class="form-field"><label>${h(field.label)}</label><input data-plugin-field name="${h(field.name)}" maxlength="${h(field.max_length)}" value="${h(field.value)}" placeholder="${h(field.placeholder || "")}"></div>`).join("")}
         <div class="form-field"><label>工具箱每日额度</label><input name="quota" type="number" min="1" max="10000" value="${group.quota}"></div>
         <div class="form-field"><label>图库模式</label><select name="gallery_mode"><option value="public" ${group.gallery_mode === "public" ? "selected" : ""}>公共图库</option><option value="local" ${group.gallery_mode === "local" ? "selected" : ""}>本群图库（最多100张）</option></select></div>
         <div class="form-field"><label>学习库范围</label><select name="library_mode"><option value="public" ${group.learning.library_mode === "public" ? "selected" : ""}>公开学习库（默认）</option><option value="local" ${group.learning.library_mode === "local" ? "selected" : ""}>本群私有学习库</option></select><small>公开库会和其他公开群共享问答；私有库只在本群学习和回复。</small></div>
@@ -354,7 +354,6 @@ async function saveGroup(form) {
   const disabled = [...form.querySelectorAll('input[name="disabled"]:checked')].map((input) => input.value);
   const body = {
     display_name: form.elements.display_name.value,
-    server: form.elements.server.value,
     quota: Number(form.elements.quota.value),
     gallery_mode: form.elements.gallery_mode.value,
     disabled,
@@ -370,6 +369,7 @@ async function saveGroup(form) {
       library_mode: form.elements.library_mode.value,
     },
   };
+  for (const input of form.querySelectorAll("[data-plugin-field]")) body[input.name] = input.value;
   await api(scoped(`/admin/api/groups/${card.dataset.scope}`), { method: "POST", body: JSON.stringify(body) });
   toast("群设置已保存");
   await renderGroups();

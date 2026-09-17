@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 
 from message_ui import help_panel, panel
 from .storage import Identity, Store, ToolError, clean
-from . import gallery
+from . import gallery, group_extensions
 
 CST = timezone(timedelta(hours=8))
 PROTECTED = {"ping", "toolbox", "bot", "group", "command", "left_reply", "comment"}
@@ -101,8 +101,7 @@ def admin_panel(store: Store, who: Identity) -> str:
         "当前会话管理：" if who.private else "本群管理：" if who.scope.startswith("group:") else "当前频道管理：",
         "关键词 · /custom_reply set 关键词 | 内容", "/custom_reply list · /custom_reply del 关键词",
         "命令开关 · /command enable/disable 命令",
-        "狩猎默认小区 · /group server 小区名", "每日配额 · /group quota 次数",
-        "狩猎 · /hunt rule · /hunt kill · /hunt undo",
+        *group_extensions.help_lines(), "每日配额 · /group quota 次数",
         "结束投票 · /vote close 编号", "抽奖开奖 · /lottery draw 编号",
     ]
     if not who.private and who.scope.startswith("group:"):
@@ -183,9 +182,9 @@ def management(store: Store, who: Identity, name: str, raw: str) -> str:
             return panel("今日工具箱用量", [f"已用 {used} / {limit} 次", f"剩余 {max(0, limit-used)} 次"], footer="仅统计新版工具箱非帮助请求（含失败请求）；不代表腾讯消息额度。北京时间零点重置。")
         if name == "group":
             if not args:
-                lines = [f"狩猎默认小区：{doc.get('server', '未设置')}", f"工具箱日限额：{doc.get('quota', 100)} / 人",
+                lines = [*group_extensions.overview(doc), f"工具箱日限额：{doc.get('quota', 100)} / 人",
                          "当前图库：" + gallery.target_from_doc(who, doc).label,
-                         "/group server 梦羽宝境", "/group quota 100", "我的管理功能：/bot"]
+                         "/group quota 100", "我的管理功能：/bot"]
                 if gallery.can_switch(store, who):
                     lines.append("/group gallery public 或 local")
                 return panel("当前会话设置", lines, footer="图库切换仅群主/总管理员可用；设置立即生效。")
@@ -201,9 +200,9 @@ def management(store: Store, who: Identity, name: str, raw: str) -> str:
                 return panel("图库模式已切换", ["当前：" + ("公共图库" if public else "本会话图库"),
                     "后续上传将公开给使用公共图库的群；公共图仅总管理员可删除。" if public else "后续上传仅当前会话可用；所有分类合计最多 100 张。",
                     "原图库图片保留，不会自动搬迁或公开。"], footer="/image 查看帮助 · /image status 查看容量")
-            if args[0] == "server" and len(args) == 2:
-                doc["server"] = clean(args[1], 30)
-                return panel("设置已保存", "狩猎默认小区：" + doc["server"])
+            plugin_result = group_extensions.configure(doc, args)
+            if plugin_result is not None:
+                return plugin_result
             if args[0] == "quota" and len(args) == 2:
                 doc["quota"] = integer(args[1], 1, 10000)
                 return panel("设置已保存", f"工具箱每人每天 {doc['quota']} 次，立即生效。")
@@ -211,7 +210,7 @@ def management(store: Store, who: Identity, name: str, raw: str) -> str:
             if len(args) == 3 and args[:2] in (["admin", "add"], ["admin", "remove"]):
                 store.require_admin(who, owner=True)
             else:
-                raise ToolError("用法：/group server 小区名 | /group quota 次数；群主可用 /group gallery public 或 local 切换图库。")
+                raise ToolError("用法：/group quota 次数；群主可用 /group gallery public 或 local 切换图库。发送 /group 查看插件设置。")
         elif name == "command":
             if not args or args == ["list"]:
                 disabled = doc.get("disabled", [])
@@ -347,62 +346,3 @@ def activities(store: Store, who: Identity, kind: str, raw: str) -> str:
             elif op == "leave":
                 lines.append("你已退出报名。")
         return panel(f"{e['title']} · #{args[1]}", lines, subtitle="已结束" if e["closed"] else "进行中", footer="结果保存在服务器，重复开奖不会重抽。" if kind == "lottery" else "仅本会话可查看；不公开投票人的身份。")
-
-
-def hunt(store: Store, who: Identity, raw: str) -> str:
-    args = raw.split()
-    if not args:
-        return help_panel("手动狩猎时钟", ["管理员设置规则：/hunt rule 怪物 最早小时 最晚小时", "示例：/hunt rule 测试怪 4 6", "/hunt kill 怪物 [服务器] [已过去的分钟]", "/hunt check 怪物 [服务器]", "/hunt list [服务器]", "/hunt undo 怪物 [服务器]", "/group server 梦羽宝境"], footer="窗口由管理员设置，不包含自动通报、触发条件或维护重置；过窗不等于已刷新。")
-    with store.state(who.scope_key) as doc:
-        rules = doc.setdefault("hunt_rules", {})
-        kills = doc.setdefault("hunt_kills", {})
-        op = args[0]
-        if op == "rule":
-            store.require_admin(who)
-            if len(args) != 4:
-                raise ToolError("用法：/hunt rule 怪物 最早小时 最晚小时")
-            name = clean(args[1], 40)
-            try:
-                early, late = float(args[2]), float(args[3])
-            except ValueError:
-                raise ToolError("小时必须是数字。") from None
-            if not (0 < early <= late <= 720):
-                raise ToolError("需要满足 0 < 最早 ≤ 最晚 ≤ 720 小时。")
-            if name not in rules and len(rules) >= 100:
-                raise ToolError("规则已满（最多 100 个）。")
-            rules[name] = [early, late]
-            return panel("狩猎规则已保存", f"{name} · 击杀后 {early:g}～{late:g} 小时窗口", footer="这是管理员手动设定的范围，不是官方刷新保证。")
-        if op == "list":
-            if len(args) > 2:
-                raise ToolError("用法：/hunt list [服务器]")
-            server = args[1] if len(args) == 2 else doc.get("server", "")
-            rows = [v for v in kills.values() if v["server"] == server and v["times"]]
-            return panel("狩猎记录 · "+server, [f"{v['name']} · 最近击杀 {stamp(v['times'][-1])}" for v in rows[:12]] or ["没有击杀记录；先设置默认服务器和狩猎规则。"], footer="/hunt check 怪物 服务器 查看窗口。")
-        if op not in {"kill", "check", "undo"} or not 2 <= len(args) <= (4 if op == "kill" else 3):
-            raise ToolError("发送 /hunt 查看用法。")
-        name = clean(args[1], 40)
-        server = args[2] if len(args) >= 3 else doc.get("server", "")
-        if not server:
-            raise ToolError("请提供服务器，或先 /group server 服务器。")
-        server = clean(server, 30)
-        if name not in rules:
-            raise ToolError("尚未设置此怪物的窗口规则。管理员请先 /hunt rule 怪物 最早小时 最晚小时")
-        key = name + "|" + server
-        if key not in kills and len(kills) >= 500:
-            raise ToolError("此会话狩猎记录已满。")
-        record = kills.setdefault(key, {"name":name,"server":server,"times":[]})
-        if op in {"kill", "undo"}:
-            store.require_admin(who)
-            if op == "kill":
-                minutes = integer(args[3], 0, 43200) if len(args) == 4 else 0
-                record["times"].append(time.time()-minutes*60)
-                record["times"] = record["times"][-20:]
-            elif record["times"]:
-                record["times"].pop()
-                return panel("已撤销上一条击杀记录", f"{name} · {server}", footer="可查询上一条记录；最多保留最近 20 次。")
-        if not record["times"]:
-            raise ToolError("尚无击杀记录。")
-        last = record["times"][-1]
-        early, late = [last+h*3600 for h in rules[name]]
-        status = "窗口未到" if time.time()<early else ("窗口内" if time.time()<=late else "已过窗口上限；需确认是否漏记")
-        return panel(f"{name} · {server}", [status, f"最后击杀：{stamp(last)}", f"估算窗口：{stamp(early)} ～ {stamp(late)}"], footer="北京时间；仅根据本群手动记录估算，不代表怪物已出现。")

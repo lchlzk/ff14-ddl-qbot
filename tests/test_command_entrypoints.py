@@ -17,7 +17,7 @@ except ValueError:
     nonebot.init(driver="~fastapi+~httpx+~websockets")
 
 from bot_tools.storage import Identity, Store, ToolError
-from bot_tools.catalog import ff14_directory
+from qbot_ff14.catalog import ff14_directory
 from nonebot.adapters.qq import Bot
 from nonebot.adapters.qq.config import BotInfo
 from nonebot.adapters.qq.event import C2CMessageCreateEvent, GroupAtMessageCreateEvent, GroupMessageCreateEvent

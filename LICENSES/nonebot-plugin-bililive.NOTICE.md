@@ -1,6 +1,7 @@
 # nonebot-plugin-bililive notice
 
-The native QQ Bilibili subscription implementation in `bot_tools/bililive.py`
+The native QQ Bilibili subscription implementation in the optional
+`ff14-ddl-qbot-plugin-bililive` repository
 adapts the polling model and first-run offset behaviour from:
 
 - Project: `Akiyy-dev/nonebot-plugin-bililive`
@@ -11,8 +12,8 @@ adapts the polling model and first-run offset behaviour from:
 
 The native QQ adapter integration, message delivery, persistence, permissions,
 card rendering and later polling improvements were rewritten or extended in
-this project in 2026. The adapted source is in `bot_tools/bililive*.py` and
-`plugins/bililive.py`.
+this project in 2026. The adapted source now lives in that plugin repository's
+`src/qbot_bililive/` and `src/plugins/bililive.py`, not in the bot core.
 
 The license text is included as the repository-root `LICENSE` and
 `LICENSES/AGPL-3.0-only.txt`; the upstream

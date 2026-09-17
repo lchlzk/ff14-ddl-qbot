@@ -1,5 +1,5 @@
 # First-party plugins are separate GitHub repositories.
 # Full commit hashes pin the reviewed plugin code; update each deliberately.
-ff14-ddl-qbot-plugin-bililive @ git+https://github.com/lchlzk/ff14-ddl-qbot-plugin-bililive.git@e57c0d42599bd1d565a82bc579e695eaecf0451c
-ff14-ddl-qbot-plugin-ff14 @ git+https://github.com/lchlzk/ff14-ddl-qbot-plugin-ff14.git@a70131e00ba6805303e453b14bc439f6ac0f70cf
+ff14-ddl-qbot-plugin-bililive @ git+https://github.com/lchlzk/ff14-ddl-qbot-plugin-bililive.git@3ee2853a39db2e3ab171bad06f1b03b16396bab8
+ff14-ddl-qbot-plugin-ff14 @ git+https://github.com/lchlzk/ff14-ddl-qbot-plugin-ff14.git@6841b53d65385fb2a730e819d246598c16cc31d5
 ff14-ddl-qbot-plugin-trickcal @ git+https://github.com/lchlzk/ff14-ddl-qbot-plugin-trickcal.git@b3194ee586ad0ca070be9792dc69f5c91678df80

@@ -28,6 +28,7 @@ from .ai_provider import model_for
 from .ai_store import AIStore, conversation
 from .bot_credentials import BOT_ID, BotCredentialStore
 from .community import MANAGED
+from . import group_extensions
 from .learning_chat import LearningStore
 from .storage import Store, ToolError, clean
 from .gallery import SIZE_SQL, read_row
@@ -536,9 +537,12 @@ class WebAdmin:
             """
             if query:
                 joined += """ AND (instr(casefold(m.official_name),?)>0
-                    OR instr(casefold(m.manual_name),?)>0 OR instr(substr(s.scope,1,10),?)>0
-                    OR instr(casefold(json_extract(CASE WHEN json_valid(d.value) THEN d.value ELSE '{}' END,'$.server')),?)>0)"""
-            params += [query]*4 if query else []
+                    OR instr(casefold(m.manual_name),?)>0 OR instr(substr(s.scope,1,10),?)>0"""
+                params += [query] * 3
+                for key in group_extensions.search_keys():
+                    joined += " OR instr(casefold(json_extract(CASE WHEN json_valid(d.value) THEN d.value ELSE '{}' END,?)),?)>0"
+                    params += ["$." + key, query]
+                joined += ")"
             total = db.execute("SELECT COUNT(*) FROM (" + joined + ")", params).fetchone()[0]
             rows = db.execute(joined + " ORDER BY s.scope LIMIT ? OFFSET ?",
                               (*params, PAGE_SIZE, (page-1)*PAGE_SIZE)).fetchall()
@@ -566,11 +570,13 @@ class WebAdmin:
                         "name": row["manual_name"] or row["official_name"] or "",
                         "manual_name": row["manual_name"] or "", "official_name": row["official_name"] or "",
                         "name_checked": row["checked"] or 0, "name_error": row["last_error"] or "",
-                        "server": str(doc.get("server") or ""),
+                        **group_extensions.summary(doc),
+                        "plugin_fields": group_extensions.admin_fields(doc),
+                        "plugin_details": group_extensions.admin_details(doc),
                         "quota": doc.get("quota", 100) if type(doc.get("quota", 100)) is int else 100,
                         "gallery_mode": "local" if doc.get("gallery_mode") == "local" else "public",
                         "disabled": sorted(v for v in doc.get("disabled", []) if isinstance(v,str) and v in MANAGED),
-                        "custom_replies": len(doc.get("replies", {})), "hunt_rules": len(doc.get("hunt_rules", {})),
+                        "custom_replies": len(doc.get("replies", {})),
                         "roles": role_counts.get(scope, 0), "gallery_count": amount, "gallery_size": _size(size),
                         "learning": {
                             "enabled": bool(learned["enabled"]) if learned else False,
@@ -606,12 +612,7 @@ class WebAdmin:
                     "UPDATE group_metadata SET manual_name=? WHERE scope=?",
                     (display_name, scope),
                 )
-            if "server" in data:
-                server = str(data["server"]).strip()
-                if server:
-                    doc["server"] = clean(server, 30)
-                else:
-                    doc.pop("server", None)
+            group_extensions.admin_update(doc, data)
             if "quota" in data:
                 try:
                     quota = int(data["quota"])

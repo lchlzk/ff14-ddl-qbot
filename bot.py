@@ -104,8 +104,10 @@ def load_first_party_plugins() -> set[str]:
 
 loaded_first_party_plugins = load_first_party_plugins()
 load_third_party_plugins()
-if "plugins.bililive" in loaded_first_party_plugins:
-    import_module("plugins.bililive").configure_adapter(qq_adapter)
+for module_name in sorted(loaded_first_party_plugins):
+    configure_adapter = getattr(import_module(module_name), "configure_adapter", None)
+    if configure_adapter is not None:
+        configure_adapter(qq_adapter)
 
 app: FastAPI = nonebot.get_app()
 web_admin = install_web_admin(app)
