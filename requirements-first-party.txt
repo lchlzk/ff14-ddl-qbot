@@ -2,4 +2,4 @@
 # Full commit hashes pin the reviewed plugin code; update each deliberately.
 ff14-ddl-qbot-plugin-bililive @ git+https://github.com/lchlzk/ff14-ddl-qbot-plugin-bililive.git@3ee2853a39db2e3ab171bad06f1b03b16396bab8
 ff14-ddl-qbot-plugin-ff14 @ git+https://github.com/lchlzk/ff14-ddl-qbot-plugin-ff14.git@6841b53d65385fb2a730e819d246598c16cc31d5
-ff14-ddl-qbot-plugin-trickcal @ git+https://github.com/lchlzk/ff14-ddl-qbot-plugin-trickcal.git@ef38040747467988b2458293f1b7b82afc34de38
+ff14-ddl-qbot-plugin-trickcal @ git+https://github.com/lchlzk/ff14-ddl-qbot-plugin-trickcal.git@a534117480e84252e6260f437f886043abe4a221
